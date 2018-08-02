@@ -15,4 +15,19 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-//Route::get('/','');
+Route::middleware(['auth'])->prefix('admin')->namespace('Backend')->name('admin')->group(function(){
+    //Route::get('/','DashboardController@index')->name('index');
+    Route::get('/settings','SettingsController@index')->name('index');
+    Route::get('/settings/store','SettingsController@store')->name('store');
+    
+});
+
+Auth::routes();
+
+Route::match(['post','get'],'register', function (){
+   Auth::logout();
+   return redirect('/');   
+})->name('register');
+
+//Route::get('/home','HomeController')->name('home');
+
