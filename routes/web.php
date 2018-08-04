@@ -15,12 +15,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::middleware(['auth'])->prefix('admin')->namespace('Backend')->name('admin')->group(function(){
+//Route::middleware(['auth'])->prefix('admin')->namespace('Backend')->name('admin')->group(function(){
     //Route::get('/','DashboardController@index')->name('index');
-    Route::get('/settings','SettingsController@index')->name('index');
+    Route::get('/settings','TelegramController@getMe')->name('getMe');
     Route::get('/settings/store','SettingsController@store')->name('store');
     
-});
+//});
 
 Auth::routes();
 
