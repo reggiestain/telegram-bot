@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use Telegram\Bot\Api;
-use App\Models\Botconfig;
-use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\Admin\PagesController as Admin;
 
 class TelegramController extends Controller {
 
@@ -13,10 +11,11 @@ class TelegramController extends Controller {
     protected $chat_id;
     protected $username;
     protected $token;
+    protected $config;
 
     public function __construct() {
-        $botconfig = Botconfig::where('user_id', Auth::user()->id)->first();
-        $this->token = $botconfig->token;
+        $this->config = new Admin;
+        $this->token = $this->config->getconfig()->token;
         $this->telegram = new Api($this->token);
     }
 
@@ -24,28 +23,47 @@ class TelegramController extends Controller {
         $response = $this->telegram->getMe();
         return $response;
     }
+    
+    public function getMessageId() {
+        $response = $this->telegram->getUpdates();
+        
+        foreach ($response as $key => $value) {
+            $chat_id = $value['id'];
+        }
+        
+        return $chat_id;
+    }
 
     public function getBTCEquivalent() {
-        $botconfig = Botconfig::where('user_id', Auth::user()->id)->first();
-        $client = new \GuzzleHttp\Client();
+        $client = new \GuzzleHttp\Client;
+        try {
+         $request = $client->get('https://api.coindesk.com/v1/bpi/currentprice/' . $this->config->getconfig()->currency . '.json');
+         $body = (string) $request->getBody();
+          $response = json_decode($body, true);
 
-        $request = $client->get('https://api.coindesk.com/v1/bpi/currentprice/' . 
-                                 $botconfig->currency . '.json');
-        $body = $request->getBody();
-        $response = json_decode($body,true);
+          return $response['bpi']['USD'];
+        } catch (GuzzleHttp\Exception\ClientException $e) {
 
-        return $response['bpi'][$botconfig->currency];
+            if ($e->hasResponse()) {
+                $exception = (string) $e->getResponse()->getBody();
+                $exception = json_decode($exception);
+                return new JsonResponse($exception, $e->getCode());
+            } else {
+                return new JsonResponse($e->getMessage(), 503);
+            }
+        }
+       
     }
 
     public function sendMessage() {
-        $res   = $this->getBTCEquivalent();
-        $rate  = $res['rate'];
+        $res = $this->getBTCEquivalent();
+        $rate = $res['rate'];
         $float = $res['rate_float'];
-        $code  = $res['code'];
-        $amount = 30 / (float) $rate; 
-        $message = '30 USD is '.$amount.' BTC ('.$float.' '.$code.' - 1 BTC)';
+        $code = $res['code'];
+        $amount = round(abs($rate) / 30, 2);
+        $message = '30 USD is ' . $amount . ' BTC (' . $float . ' ' . $code . ' - 1 BTC)';
         $data = [
-            'chat_id' => '668859911',
+            'chat_id' => $this->getMessageId(),
             'text' => $message,
         ];
 

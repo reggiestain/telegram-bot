@@ -20,8 +20,8 @@ Route::post('/login', ['as' => 'login.post', 'uses' => 'Auth\LoginController@log
 Route::group(['prefix' => 'bot-config','middleware' => 'auth'], function() {
     Route::get('/dashboard', ['as' => 'admin.dashboard', 'uses' => 'Admin\PagesController@getDashboard']);
     Route::post('/dashboard', ['as' => 'admin.storeconfig', 'uses' => 'Admin\PagesController@storeconfig']);
-    Route::get('/settings', 'TelegramController@getMe')->name('getMe');
-    Route::get('/settings/store', 'SettingsController@store')->name('store');
+    //Route::get('/settings', 'TelegramController@getMe')->name('getMe');
+    //Route::get('/settings/store', 'SettingsController@store')->name('store');
 });
 
 Route::get('logout', ['as' => 'logout', 'uses' => 'Auth\LoginController@logout']);

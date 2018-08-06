@@ -16,9 +16,14 @@ class PagesController extends Controller {
         $this->middleware('auth');
     }
     
-    protected function user(){
+    protected function getuser(){
         $user = Auth::user();        
         return $user;
+    }
+    
+    public function getconfig(){
+        $botconfig = Botconfig::where('user_id', $this->getuser()->id)->first();
+        return $botconfig;
     }
     
     protected function validator(array $data) {
@@ -29,10 +34,13 @@ class PagesController extends Controller {
     }
 
     public function getDashboard() {
-        $botconfig = Botconfig::where('user_id', $this->user()->id)->first();
-        $bot = new Bot($botconfig->token);
+         $bot= new Bot;
+         var_dump($bot->sendMessage());
+         exit();
+        $botconfig = Botconfig::where('user_id', $this->getuser()->id)->first();        
         
-        if($botconfig){           
+        if($botconfig){  
+           $bot = new Bot($botconfig->token);
            $telebot = json_decode($bot->getMe()); 
            return view('admin.pages.account',['config' => $botconfig,'bot'=>$telebot]);
         }
