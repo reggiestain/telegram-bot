@@ -17,8 +17,6 @@ class CreateBotconfigTable extends Migration
             $table->increments('id');
             $table->integer('user_id')->unsigned();
             $table->string('token',250)->unique();
-            $table->string('currency',3);
-            $table->string('webhook',250)->nullable();
             $table->timestamps();
         });
     }
