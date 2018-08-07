@@ -31,16 +31,32 @@ class TelegramController extends Controller {
             $this->text = $request['message']['text'];
         }
 
-        switch ($this->text) {
-            case '/getBTCEquivalent 30 USD';
-                $this->sendBTC($this->chat_id);
+        if (strlen($this->text) == 24) {
+            
+            $currency = substr($this->text, -3, 3);            
+            $amount = substr($this->text, -6, 2);            
+            $message = '/getBTCEquivalent '.$amount.' '. $currency;
+            
+        } elseif(strlen($this->text) == 20){
+            
+            $amount = substr($this->text, -3, 3); 
+            $currency = 'USD';
+            $message = '/getBTCEquivalent '.$amount.' '. $currency;
+            
+        }else{
+            $message = '/getUserID';
+        }
+        
+        switch ($message) {
+            case $message:
+                $this->sendBTC($this->chat_id, $currency,$amount);
                 break;
-            case '/getUserID':
+            case $message:
                 $this->getUserID($this->chat_id);
                 break;
         }
     }
-            
+
     /**
      * 
      * @return type
@@ -57,7 +73,7 @@ class TelegramController extends Controller {
     public function sendMessage() {
         $requests = $this->telegram->getUpdates();
 
-       return  $this->handleRequest($requests);
+        return $this->handleRequest($requests);
     }
 
     /**
@@ -97,19 +113,19 @@ class TelegramController extends Controller {
 
         $this->telegram->sendMessage($data);
     }
-    
-    public function delete() {
-      $this->telegram->deleteWebhook();  
-    }
-    
 
-    protected function sendBTC($chat_id) {
+    public function delete() {
+        $this->telegram->deleteWebhook();
+    }
+
+    protected function sendBTC($chat_id, $currency, $amount) {
+        
         $res = $this->getBTCEquivalent();
+        
         $rate = $res['rate'];
         $float = $res['rate_float'];
-        $code = $res['code'];
-        $amount = round(abs($rate) / 30, 2);
-        $message = '30 ' . $code . ' is ' . $amount . ' BTC (' . $float . ' ' . $code . ' - 1 BTC)';
+        $rateamount = round(abs($rate) / 30, 2);
+        $message = $amount.' '. $currency . ' is ' . $rateamount . ' BTC (' . $float . ' ' . $currency . ' - 1 BTC)';
         $data = [
             'chat_id' => $chat_id,
             'text' => $message,
