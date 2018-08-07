@@ -16,7 +16,7 @@ class PagesController extends Controller {
         $this->middleware('auth');
     }
     
-    protected function getuser(){
+    public function getuser(){
         $user = Auth::user();        
         return $user;
     }
@@ -29,19 +29,16 @@ class PagesController extends Controller {
     protected function validator(array $data) {
         return Validator::make($data, [
                     'token' => 'required|string|unique:botconfig',
-                    'currency' => 'required|string|min:3',
         ]);
     }
 
     public function getDashboard() {
-         $bot= new Bot;
-         var_dump($bot->sendMessage());
-         exit();
         $botconfig = Botconfig::where('user_id', $this->getuser()->id)->first();        
         
         if($botconfig){  
            $bot = new Bot($botconfig->token);
-           $telebot = json_decode($bot->getMe()); 
+           $telebot = json_decode($bot->getMe());
+           $bot->sendMessage();
            return view('admin.pages.account',['config' => $botconfig,'bot'=>$telebot]);
         }
         
@@ -71,6 +68,21 @@ class PagesController extends Controller {
         $this->create($request->all());
         
         return Redirect::back()->with('success', 'Config was created successfully.');
+       
+    }
+    
+    public function updateconfig(Request $request) {
+        
+        $validator = $this->validator($request->all());
+        
+        if ($validator->fails()) {
+            return Redirect::back()->withErrors($validator);
+        }
+
+        // create config
+        $user->name = request('token');
+        $user->save();
+        return Redirect::back()->with('success', 'Config was updated successfully.');
        
     }
 

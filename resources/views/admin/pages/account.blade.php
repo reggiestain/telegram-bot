@@ -36,7 +36,7 @@
         </div>
         @endif
         
-        <form role="form" method="POST" action="{{ route('admin.storeconfig') }}">
+        <form role="form" method="POST" action="{{ route('admin.updateconfig') }}">
             {{ csrf_field() }}
             
              @if(is_null($bot))
@@ -57,23 +57,7 @@
                 </span>
                 @endif
             </div>
-   
-            <div class="form-group">
-                <label>Default Currency</label>
-                <input class="form-control" name="currency" placeholder="Enter currency" value="{{ $config->currency or '' }}">
-            </div>
-
-            <div class="form-group">
-                <label>Telegram Webhook</label>
-                <input class="form-control" name="webhook" placeholder="Enter webhook" value="{{ $config->webhook or '' }}">
-                @if ($errors->has('webhook'))
-                <span class="error text-danger">
-                    <strong>{{ $errors->first('webhook') }}</strong>
-                </span>
-                @endif
-            </div>
-
-            <button type="submit" class="btn btn-success">Save</button>
+            <button type="submit" class="btn btn-success">Update</button>
 
         </form>
 
